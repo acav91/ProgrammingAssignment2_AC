@@ -1,0 +1,42 @@
+# These two functions can be used to create matrix objects that can be
+# cached along with their inverses.
+
+# Create a matrix object that can cache its inverse.
+# Assume the supplied matrix is always invertible.
+
+makeCacheMatrix <- function(x = matrix()) {
+        inv <- NULL
+                # inverted matrix reset to NULL when makeCacheMatrix is called
+        set <- function(y) {
+                x <<- y
+                inv <<- NULL
+        }
+                # allows you to rewrite the input matrix as a new object
+        get <- function() {x}
+                # returns the value of the original matrix (input)
+        setinv <- function(inv_input) {inv <<- inv_input}
+                # called by cacheSolve during first cacheSolve access
+                # stores the calculated value in the matrix created by
+                        # makeCacheMatrix using superassignment
+        getinv <- function() {inv}
+                # returns the cached value of 'inv' on subsequent access
+        list(get = get, setinv = setinv, getinv = getinv)
+                # returns a list of object methods each time a matrix is
+                        # created using makeCacheMatrix
+}
+
+
+# Compute the inverse of the matrix object created by makeCacheMatrix.
+# If the inverse has already been computed, return cached value.
+
+cacheSolve <- function(x, ...) { #input x is a matrix created by makeCacheMatrix
+        inv <- x$getinv() # accesses the object 'x' and gets the value of inv
+        if(!is.null(inv)) { # if inv was already cached
+                message("getting cached data")
+                return(inv)
+        }
+        data <- x$get() # if inv was not already cached, access original matrix
+        inv <- solve(data, ...) # invert the original matrix
+        x$setinv(inv) # store the value of inv in x using the object method
+        inv # return the value of inv
+}
